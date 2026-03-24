@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "188508332189",
+    "project_id": "flyer-project-2b5c9",
+    "storage_bucket": "flyer-project-2b5c9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188508332189:android:dcf2f57cd66e13f9557474",
+        "android_client_info": {
+          "package_name": "com.example.flyer_display_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0awSU2uj1aP_j-fcTQfPGoUb-BDrbwAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
