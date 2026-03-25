@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,8 +16,6 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load();
 
   try {
     await Firebase.initializeApp(
@@ -68,46 +65,47 @@ class _TvBootstrapPageState extends State<TvBootstrapPage> {
   }
 
   Future<void> _bootstrap() async {
-    final baseUrl = dotenv.env['API_BASE_URL'] ?? '';
+  const baseUrl = "https://processador-imagem-712380421019.europe-west1.run.app/";
 
-    if (baseUrl.isEmpty) {
-      setState(() {
-        _loading = false;
-        _error = 'API_BASE_URL não definido no .env';
-      });
-      return;
-    }
+  _baseUrl = baseUrl;
 
-    _baseUrl = baseUrl;
+  try {
+    final (savedDeviceId, savedPanelToken) =
+        await FlyerApiService.readSavedAuth();
 
-    try {
-      final (savedDeviceId, savedPanelToken) = await FlyerApiService.readSavedAuth();
-
-      if (savedDeviceId != null && savedDeviceId.isNotEmpty && savedPanelToken != null && savedPanelToken.isNotEmpty) {
-        _apiService = FlyerApiService(
+    if (savedDeviceId != null &&
+        savedDeviceId.isNotEmpty &&
+        savedPanelToken != null &&
+        savedPanelToken.isNotEmpty) {
+      _apiService = FlyerApiService(
         baseUrl: baseUrl,
         panelToken: savedPanelToken,
         deviceId: savedDeviceId,
       );
 
-        final pairData = await _apiService!.checkIfPaired();
-        if (pairData.$1 && pairData.$2 != null) {
-          if (!mounted) return;
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => FlyerViewer(apiService: _apiService!, userId: pairData.$2!)),
-          );
-          return;
-        }
+      final pairData = await _apiService!.checkIfPaired();
+      if (pairData.$1 && pairData.$2 != null) {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => FlyerViewer(
+              apiService: _apiService!,
+              userId: pairData.$2!,
+            ),
+          ),
+        );
+        return;
       }
-
-      await _startRegistrationFlow();
-    } catch (e) {
-      setState(() {
-        _loading = false;
-        _error = 'Falha na inicialização da TV: $e';
-      });
     }
+
+    await _startRegistrationFlow();
+  } catch (e) {
+    setState(() {
+      _loading = false;
+      _error = 'Falha na inicialização da TV: $e';
+    });
   }
+}
 
   Future<void> _startRegistrationFlow() async {
     await FlyerApiService.clearSavedAuth();
@@ -455,13 +453,13 @@ class _FlyerViewerState extends State<FlyerViewer> {
           alignment: Alignment.center,
           children: [
             flyer.hasVideo
-  ? _buildVideoWidget(constraints)
-      : AnimatedSwitcher(
-          duration: const Duration(milliseconds: 700),
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: _buildImageWidget(constraints),
-        ),
+          ? _buildVideoWidget(constraints)
+          : AnimatedSwitcher(
+              duration: const Duration(milliseconds: 700),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: _buildImageWidget(constraints),
+            ),
 
             // 🔥 TIMER (mantido)
             if (flyer.timerEnabled)
